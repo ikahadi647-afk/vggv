@@ -1,0 +1,28 @@
+Hello! I'm really impressed with the application so far. Now, I want to take it to the next level by replacing the local storage mock data with a real backend using Supabase. This will make the app a full-stack, data-persistent application.
+Here are the detailed requirements for this integration:
+1. Backend & Database Setup:
+Integrate Supabase: Add the @supabase/supabase-js client library to the project.
+Client Initialization: Create a dedicated service file (e.g., /services/supabase.ts) to initialize the Supabase client.
+Environment Variables: The client should be configured using environment variables process.env.SUPABASE_URL and process.env.SUPABASE_ANON_KEY. The application code must assume these are already set up and available.
+2. Authentication:
+Replace Mock Auth: Remove the mock user authentication from Login.tsx and App.tsx.
+Supabase Auth: Implement user login using Supabase Auth's signInWithPassword method.
+Session Management: The application's authentication state (isAuthenticated, currentUser) in App.tsx should be managed by listening to Supabase's onAuthStateChange events.
+Logout: Implement a logout function that calls supabase.auth.signOut.
+Initial Users: The two users from MOCK_USERS in constants.tsx should be the initial users created in the Supabase auth.users table for testing.
+3. Database Schema & Data Migration:
+Schema Definition: The application's data models (Client, Project, TeamMember, Transaction, etc., from types.ts) need to be translated into a Supabase database schema. Use snake_case for table and column names (e.g., team_members, project_name). Foreign key relationships should be established where appropriate (e.g., projects.client_id references clients.id).
+Data Seeding: The existing mock data from MOCK_DATA in constants.tsx should be migrated to the new Supabase tables. This will serve as the initial dataset for the live application.
+4. Full CRUD Implementation:
+Remove usePersistentState: The custom hook usePersistentState and all direct uses of localStorage for application data must be removed.
+API Service Layer: Abstract all database interactions into functions within the /services/supabase.ts file or a new /services/api.ts file. Components should call these service functions, not the Supabase client directly.
+Read (SELECT): All components currently reading from state variables (e.g., clients, projects) must be refactored to fetch data asynchronously from Supabase on component mount. Implement loading and error states in the UI to handle the asynchronous nature of these calls.
+Create (INSERT): All forms that add new data (e.g., new client, new project, new transaction) must be updated to call an insert function from the API service layer.
+Update (UPDATE): All editing functionalities must be updated to call an update function.
+Delete (DELETE): All delete buttons must call a delete function.
+5. Storage for File Uploads:
+Refactor Base64 Fields: Fields that currently store base64 strings (like dpProofUrl, logoBase64, invoiceSignature) should be refactored.
+Supabase Storage: Implement file upload functionality using Supabase Storage. When a user uploads a file (e.g., a logo in settings, a proof of payment in a form), the file should be uploaded to a Supabase bucket.
+Store URL: The database should store the public URL of the uploaded file, not the file itself or a base64 string.
+6. Real-time Functionality:
+Subscriptions: Implement Supabase real-time subscriptions for key tables like projects and notifications. This will ensure that data displayed in the app is always up-to-date without requiring manual refreshes. For example, a new booking should appear in the Booking dashboard instantly.
